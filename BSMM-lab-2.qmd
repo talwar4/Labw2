@@ -2,7 +2,7 @@
 title: "BSMM-lab-2"
 subtitle: "BSMM 8740 Fall 2023"
 author: "Anubhuti Talwar"
-date: "08/29/2023"
+date: "09-29-2023"
 format: html
 editor: visual
 self-contained: true
@@ -14,6 +14,14 @@ Load packages and data:
 
 ```{r load-pkg-data}
 #| message: false
+library(dplyr)
+library(readr)
+library(magrittr)
+library(tidyverse)
+```
+
+```{r}
+# load the data #
 the_tate <- readr::read_delim("data/the-tate-collection.csv", ";", escape_double = FALSE, trim_ws = TRUE)
 the_tate_artists <- readr::read_csv("data/the-tate-artists.csv")
 ```
@@ -23,29 +31,21 @@ the_tate_artists <- readr::read_csv("data/the-tate-artists.csv")
 ### Exercise 1
 
 ```{r}
-install.packages('dplyr')
-install.packages("tidyverse")
-install.packages("gt")           
-install.packages("gtExtras")     
-install.packages("DataExplorer")
-install.packages("tidymodels")
-# Load the libraries #
-library(dplyr)
-library(readr)
-library(magrittr)
-library(tidyverse)
+# Print the result #
 the_tate <- read_delim("data/the-tate-collection.csv", ";", escape_double = FALSE, trim_ws = TRUE)
 the_tate_artists <- read_csv("data/the-tate-artists.csv")
 print(the_tate)
+
 # Calculate the no. of unique artists represented in the collection
-unique_artists_count <- the_tate %>%
- select(artist) %>%
-  distinct() %>%
+unique_artists_count <- the_tate |>
+ select(artist) |>
+  distinct() |>
   nrow()
 unique_artists_count
+
 # Total no. of rows and columns in the the_tate dataset
 tate_dimensions <- dim(the_tate)
-tate_summary <- the_tate %>%
+tate_summary <- the_tate |>
   summarize(
     Totalthe_tate = n(),               # Total no. of the_tate
     UniqueArtists = unique_artists_count, # Number of unique artists
@@ -79,29 +79,29 @@ print(works_with_missing_year)
 
 # Filter the 'the_tate' dataset to select rows with missing 'year' values #
 the_tate|>dplyr::filter(is.na(year))|>dplyr::distinct(artist)
-artists_with_missing_date <- the_tate %>%
-  filter(is.na(year)) %>%
-  distinct(artist) %>%
+artists_with_missing_date <- the_tate |>
+  filter(is.na(year)) |>
+  distinct(artist) |>
   nrow()
 print(artists_with_missing_date)
 
 #Filter the tate_dataset to select rows with missing year values#
-artist_missing_year_count <- the_tate|>dplyr::filter(is.na(year)) %>% 
-  group_by(artist) %>%
-  summarise(missing_year = sum(is.na(year))) %>% 
-  arrange(desc(missing_year)) %>% #Arrange the results in descending order of missing 'year' counts#
+artist_missing_year_count <- the_tate|>dplyr::filter(is.na(year)) |> 
+  group_by(artist) |>
+  summarise(missing_year = sum(is.na(year))) |> 
+  arrange(desc(missing_year)) |> #Arrange the results in descending order of missing 'year' counts#
   as_tibble()
 
-View(artist_missing_year_count)
+print(artist_missing_year_count)
 
 artists_with_missing_year <- nrow(artist_missing_year_count)
 
 print(artists_with_missing_year)
 
-artist_missing_year_count <- artist_missing_year_count %>% # Calculate the percentage of missing 'year' values for each artist #
+artist_missing_year_count <- artist_missing_year_count |> # Calculate the percentage of missing 'year' values for each artist #
   mutate(percentage = (missing_year / works_with_missing_year) * 100)
 
-artist_missing_year_count <- artist_missing_year_count %>%
+artist_missing_year_count <- artist_missing_year_count |>
   mutate(cumulative_percentage = cumsum(percentage)) # Calculate the cumulative percentage of missing 'year' values # 
 
 artists_to_resolve_50_percent <- min(which(artist_missing_year_count$cumulative_percentage >= 50))
@@ -121,21 +121,20 @@ The missing year data likely to be classified as MAR.
 ### Exercise 3
 
 ```{r}
-### Exercise 3
 
 
 # Calculate the count of works for each artist in the 'the_tate' dataset #
-artist_work_counts <- the_tate %>%
-  group_by(artist) %>%
-  summarize(title = n()) %>%
+artist_work_counts <- the_tate |>
+  group_by(artist) |>
+  summarize(title = n()) |>
   arrange(desc(title))
 
 # Extract and display the top 10 artists with the most works #
-top_10_artists <- artist_work_counts %>%
+top_10_artists <- artist_work_counts |>
   slice_head(n = 10)
 
-View(artist_work_counts)
-View(top_10_artists)
+print(artist_work_counts)
+print(top_10_artists)
 ```
 
 The artist with the most works in the Tate collection is Turner, Joseph Mallord William.
@@ -144,12 +143,8 @@ The artist with the tenth-most works in the Tate collection is Warhol, Andy.
 
 ### Exercise 4
 
-The artist with the greatest number of works in the Tate collection represent \_\_\_% of the total number of works
 
 ```{r}
-
-# Load the libraries #
-install.packages('gt')
 library(dplyr)
 library(gt)
 library(gtExtras)
@@ -158,24 +153,21 @@ library(gtExtras)
 
 # Calculate total works #
 total_works <- nrow(the_tate)
-
-artist_work_counts <- artist_work_counts %>%
-  mutate(percentage = (title / total_works) * 100)
-
+artist_work_counts %<>%mutate(percentage=(title/total_works)*100)
 print(artist_work_counts)
 
 # Create a gt table #
 table <- artist_work_counts %>%
   gt() %>%
   fmt_number(
-    columns = c(title, percentage),
-    decimals = 2
-  )
+    columns = c(title, percentage), # Format both title and percentage columns
+    decimals = 2 # No decimal places for title, and decimals for percentage
+  ) %>%
+  
 #Display the formatted table using print #
 print(table)
 ```
-
-![]()
+The artist with the greatest number of works in the Tate collection represent 56.9 % of the total number of works
 
 ### Exercise 5
 
@@ -184,7 +176,7 @@ print(table)
 total_rows <- total_works
 
 # Select only the columns for artist and title to count distinct combinations #
-distinct_artist_title_pair <- the_tate %>% select(artist,title) %>% distinct()
+distinct_artist_title_pair <- the_tate |> select(artist,title) |> distinct()
 
 distinct_count <- nrow(distinct_artist_title_pair)
 
@@ -206,22 +198,22 @@ There are 23705 duplicate artist-title pairs
 
 library(tidyr) # Load tidyverse library 
 
-the_tate <- the_tate %>%
+the_tate <- the_tate |>
   mutate(area_cmsquare= width * height)
 
-selected_artworks <- the_tate %>%
-  select(artist, title, area_cmsquare) %>%
+selected_artworks <- the_tate |>
+  select(artist, title, area_cmsquare) |>
   drop_na() # Remove rows with containing NA values#
 
-ordered_artworks <- selected_artworks %>%
+ordered_artworks <- selected_artworks |>
   arrange(area_cmsquare)
 
 # Remove largest artwork in the collection #
-largest_artwork <- ordered_artworks %>%
+largest_artwork <- ordered_artworks |>
   slice_tail(n = 1)
 
 # Remove smallest artwork in the collection #
-smallest_artwork <- ordered_artworks %>%
+smallest_artwork <- ordered_artworks |>
   slice_head(n = 1)
 # Print both the smallest and largest artwork details #
 print(largest_artwork)
@@ -239,11 +231,11 @@ The artist with the smallest work in the collection is Mesens, E.L.T.. The small
 library(dplyr)
 
 # Left join to group the tables and slice the result by gender criteria #
-gender_grouped<- the_tate %>%
-  dplyr::left_join(the_tate_artists, by = c("artist" = "name")) %>%   tidyr::drop_na(gender) %>% group_by(gender) # used tidyverse to drop columns having NA values and joined the two tables the_tate and the_tate_artists anf grouped by gender #
+gender_grouped<- the_tate |>
+  dplyr::left_join(the_tate_artists, by = c("artist" = "name")) |>   tidyr::drop_na(gender) |> group_by(gender) # used tidyverse to drop columns having NA values and joined the two tables the_tate and the_tate_artists anf grouped by gender #
 
 
-View(gender_grouped) # display the gender grouped table
+print(gender_grouped) # display the gender grouped table
 ```
 
 ...
@@ -251,28 +243,27 @@ View(gender_grouped) # display the gender grouped table
 ### Exercise 8
 
 ```{r}
-install.packages("readr") # Install packages for reading the csv file#
 library(dplyr)
 library(readr)
 
 data <- read_csv("data/SPX_HistoricalData_1692322132002.csv") 
-View(data)
+print(data)
 
-data <- data %>% # Add a column for the year of transaction #
+data <- data |> # Add a column for the year of transaction #
   mutate(Year = lubridate::year(as.Date(Date, format = "%m/%d/%Y")))
 
-data<- data %>%
+data<- data |>
 rename("close"=`Close/Last`)
 
-data <- data %>%
+data <- data |>
   mutate(rd = log(lead(close) / close))
 
-data<- data %>%
+data<- data |>
   mutate(vard = rd^2)
 
 
-summary_data <- data %>% #summarise the data to group by year #
-  group_by(Year) %>%
+summary_data <- data |> #summarise the data to group by year #
+  group_by(Year) |>
   summarize(
     Annual_Return = (exp(sum(rd, na.rm = TRUE)) - 1)*100, 
     Annual_StdDev = sqrt(sum(vard, na.rm = TRUE))*100,
@@ -280,7 +271,7 @@ summary_data <- data %>% #summarise the data to group by year #
   )
 
 # Print the summary data
-View(summary_data)
+print(summary_data)
 
 ```
 
@@ -292,7 +283,6 @@ The corresponding price volatility was 34.70%.
 
 ```{r}
 # Install packages for reading the csv file
-install.packages("readr")
 
 # Load required libraries
 library(dplyr)
@@ -310,18 +300,17 @@ summary_rows <- tibble::tibble(
 )
 
 # Convert the "Year" column in summary_data to character
-summary_data <- summary_data %>%
+summary_data <- summary_data |>
   mutate(Year = as.character(Year))
 
 # Combine the summary rows with the summary_data
 summary_data <- bind_rows(summary_data, summary_rows)
 
 # Print the summary data
-View(summary_data)
+print(summary_data)
 
 
 ```
 
 The period volatility was 48.77%
 
-### 
