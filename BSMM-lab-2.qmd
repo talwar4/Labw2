@@ -21,7 +21,7 @@ library(tidyverse)
 ```
 
 ```{r}
-# load the data #
+# load the dataset #
 the_tate <- readr::read_delim("data/the-tate-collection.csv", ";", escape_double = FALSE, trim_ws = TRUE)
 the_tate_artists <- readr::read_csv("data/the-tate-artists.csv")
 ```
@@ -137,12 +137,11 @@ print(artist_work_counts)
 print(top_10_artists)
 ```
 
-The artist with the most works in the Tate collection is Turner, Joseph Mallord William.
+The artist with the most works in the Tate collection is Turner,Joseph Mallord William.
 
-The artist with the tenth-most works in the Tate collection is Warhol, Andy.
+The artist with the tenth-most works in the Tate collection is Warhol,Andy.
 
 ### Exercise 4
-
 
 ```{r}
 library(dplyr)
@@ -167,6 +166,7 @@ table <- artist_work_counts %>%
 #Display the formatted table using print #
 print(table)
 ```
+
 The artist with the greatest number of works in the Tate collection represent 56.9 % of the total number of works
 
 ### Exercise 5
@@ -313,4 +313,3 @@ print(summary_data)
 ```
 
 The period volatility was 48.77%
-
